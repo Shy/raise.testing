@@ -26,3 +26,7 @@ jobs:
             #define WIFI_PASSWORD "some-password"
       - run: pip install --upgrade platformio
       - run: pio run
+      - uses: actions/upload-artifact@v3
+        with:
+          name: firmware-${{github.sha}}.bin
+          path: .pio/build/esp32dev/firmware.bin
