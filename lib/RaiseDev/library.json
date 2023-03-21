@@ -1,0 +1,9 @@
+{
+  "name": "RaiseDev",
+  "version": "0.0.1",
+  "description": "API for Raise.dev",
+  "homepage": "https://raise.dev",
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "headers": "RaiseDev.h"
+}
