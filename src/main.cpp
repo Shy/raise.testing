@@ -12,6 +12,8 @@ bool was_wifi_connected_message_output = false;
 // defined by -DFIRMWARE_VERSION in platformio.ini using `git describe`
 const String current_firmware_version = FIRMWARE_VERSION;
 
+RaiseDev raiseDev;
+
 void setup()
 {
   // Set the serial port's baud-rate to the same as in platformio.ini
@@ -21,6 +23,8 @@ void setup()
 
   // Start connection to (hardcoded) WiFi nextwork.
   WiFi.begin(wifi_ssid, wifi_password);
+
+  raiseDev.begin();
 }
 
 void loop()
@@ -42,6 +46,5 @@ void loop()
     return;
   }
 
-  RaiseDev raise_dev;
-  raise_dev.updateFirmware(current_firmware_version);
+  raiseDev.updateFirmware(current_firmware_version);
 }
