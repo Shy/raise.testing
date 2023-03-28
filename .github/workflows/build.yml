@@ -33,11 +33,12 @@ jobs:
           path: .pio/build/esp32dev/firmware.bin
       - uses: raisedevs/firmware-upload-action@main
         id: firmware-upload
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        if: github.ref == 'refs/heads/main'
         with:
           name: Raise's ESP32 firmware
           path: .pio/build/esp32dev/firmware.bin
       - name: Output firmware URLs
+        if: github.ref == 'refs/heads/main'
         run: |
           echo Firmware URL: ${{ steps.firmware-upload.outputs.url }}
           echo Firmware Binary URL: ${{ steps.firmware-upload.outputs.binary-url }}
