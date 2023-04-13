@@ -27,18 +27,16 @@ jobs:
       - run: pip install --upgrade platformio
       - run: pio run
       - run: pio pkg pack lib/RaiseDev
-      - uses: actions/upload-artifact@v3
-        with:
-          name: firmware-${{github.sha}}.bin
-          path: .pio/build/esp32dev/firmware.bin
-      - uses: raisedevs/firmware-upload-action@main
-        id: firmware-upload
+      - uses: raisedevs/version-upload-action@main
+        id: version-upload
         if: github.ref == 'refs/heads/main'
         with:
-          name: Raise's ESP32 firmware
-          path: .pio/build/esp32dev/firmware.bin
-      - name: Output firmware URLs
+          account: mikemcquaid
+          firmware: raisedevs-firmware
+          binary: .pio/build/esp32dev/firmware.bin
+      - name: Output Version details
         if: github.ref == 'refs/heads/main'
         run: |
-          echo Firmware URL: ${{ steps.firmware-upload.outputs.url }}
-          echo Firmware Binary URL: ${{ steps.firmware-upload.outputs.binary-url }}
+          echo Version Name: ${{ steps.version-upload.outputs.name }}
+          echo Version Show URL: ${{ steps.version-upload.outputs.show-url }}
+          echo Version Binary URL: ${{ steps.version-upload.outputs.binary-url }}
