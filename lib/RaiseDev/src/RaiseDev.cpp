@@ -26,8 +26,8 @@ const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
     "CZMRJCQUzym+5iPDuI9yP+kHyCREU3qzuWFloUwOxkgAyXVjBYdwRVKD05WdRerw\n"
     "6DEdfgkfCv4+3ao8XnTSrLE=\n"
     "-----END CERTIFICATE-----\n";
-const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60;
-const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60 * 10;
+const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 5;
+const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 30;
 
 // Callback when HTTPUpdate starts
 const void httpUpdateOnStart()
@@ -119,7 +119,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   last_update_attempt_milliseconds = current_milliseconds;
 
   const String updater_url = String(DASHBOARD_RAISE_DEV_DOMAIN + "/accounts/" + account + "/updater");
-  log_i("Updating current firmware version %s from %s", current_firmware_version, updater_url);
+  log_i("Updating current firmware version %s from %s", current_firmware_version, updater_url.c_str());
 
   // This will update and reboot automatically on a successful, new firmware download.
   last_update_attempt_return_code = httpUpdate.update(
