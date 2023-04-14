@@ -46,5 +46,5 @@ void loop()
     return;
   }
 
-  raiseDev.updateFirmware(current_firmware_version);
+  raiseDev.updateFirmware("mikemcquaid", current_firmware_version);
 }

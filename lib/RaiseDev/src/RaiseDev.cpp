@@ -1,7 +1,7 @@
 #include "RaiseDev.h"
 
-const String DASHBOARD_RAISE_DEV_UPDATER_URL =
-    "https://dashboard.raise.dev/updater";
+const String DASHBOARD_RAISE_DEV_DOMAIN =
+    "https://dashboard.raise.dev";
 const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
     "-----BEGIN CERTIFICATE-----\n"
     "MIIDzTCCArWgAwIBAgIQCjeHZF5ftIwiTv0b7RQMPDANBgkqhkiG9w0BAQsFADBa\n"
@@ -26,8 +26,8 @@ const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
     "CZMRJCQUzym+5iPDuI9yP+kHyCREU3qzuWFloUwOxkgAyXVjBYdwRVKD05WdRerw\n"
     "6DEdfgkfCv4+3ao8XnTSrLE=\n"
     "-----END CERTIFICATE-----\n";
-const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000;
-const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 30;
+const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60;
+const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60 * 10;
 
 // Callback when HTTPUpdate starts
 const void httpUpdateOnStart()
@@ -83,9 +83,10 @@ const void RaiseDev::begin()
 }
 
 /// @brief Updates the current firmware to one from Raise.dev
+/// @param account A String containing the Raise.dev account name
 /// @param current_firmware_version A String to ensure that the firmware is not repeatedly updated to the same version
 /// @return nothing, this method will restart on success
-const void RaiseDev::updateFirmware(const String current_firmware_version)
+const void RaiseDev::updateFirmware(const String account, const String current_firmware_version)
 {
   // Run begin() if consumers forgot to run it.
   if (!begin_method_called)
@@ -117,11 +118,12 @@ const void RaiseDev::updateFirmware(const String current_firmware_version)
   }
   last_update_attempt_milliseconds = current_milliseconds;
 
-  log_i("Updating current firmware version %s", current_firmware_version);
+  const String updater_url = String(DASHBOARD_RAISE_DEV_DOMAIN + "/accounts/" + account + "/updater");
+  log_i("Updating current firmware version %s from %s", current_firmware_version, updater_url);
 
   // This will update and reboot automatically on a successful, new firmware download.
   last_update_attempt_return_code = httpUpdate.update(
-      wifiClientSecure, DASHBOARD_RAISE_DEV_UPDATER_URL, current_firmware_version);
+      wifiClientSecure, updater_url, current_firmware_version);
 
   switch (last_update_attempt_return_code)
   {

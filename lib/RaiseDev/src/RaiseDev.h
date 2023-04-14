@@ -15,7 +15,7 @@ class RaiseDev
 {
 public:
   const void begin();
-  const void updateFirmware(String currentFirmwareVersion);
+  const void updateFirmware(String account, String current_firmware_version);
 
 private:
   WiFiUDP ntpUDP;
