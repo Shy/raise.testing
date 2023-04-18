@@ -1,8 +1,8 @@
 #include "RaiseDev.h"
 
-const String DASHBOARD_RAISE_DEV_DOMAIN =
-    "https://dashboard.raise.dev";
-const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
+const String RAISE_DEV_CONSOLE_DOMAIN =
+    "https://console.raise.dev";
+const char *RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE =
     "-----BEGIN CERTIFICATE-----\n"
     "MIIDzTCCArWgAwIBAgIQCjeHZF5ftIwiTv0b7RQMPDANBgkqhkiG9w0BAQsFADBa\n"
     "MQswCQYDVQQGEwJJRTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJl\n"
@@ -62,7 +62,7 @@ const void RaiseDev::begin()
   }
 
   // Set SSL root certificate so we can validate HTTPS connections.
-  wifiClientSecure.setCACert(DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE);
+  wifiClientSecure.setCACert(RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE);
 
   // Reading data over SSL may be slow, use a longer timeout (in seconds).
   wifiClientSecure.setTimeout(10);
@@ -119,7 +119,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   }
   last_update_attempt_milliseconds = current_milliseconds;
 
-  const String updater_url = String(DASHBOARD_RAISE_DEV_DOMAIN + "/accounts/" + account + "/updater");
+  const String updater_url = String(RAISE_DEV_CONSOLE_DOMAIN + "/accounts/" + account + "/updater");
   log_i("Updating current firmware version %s from %s", current_firmware_version, updater_url.c_str());
 
   // This will update and reboot automatically on a successful, new firmware download.
