@@ -26,8 +26,8 @@ const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
     "CZMRJCQUzym+5iPDuI9yP+kHyCREU3qzuWFloUwOxkgAyXVjBYdwRVKD05WdRerw\n"
     "6DEdfgkfCv4+3ao8XnTSrLE=\n"
     "-----END CERTIFICATE-----\n";
-const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 5;
-const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 30;
+const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 15;
+const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60 * 2;
 
 // Callback when HTTPUpdate starts
 const void httpUpdateOnStart()
@@ -110,6 +110,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   }
 
   // Check if we've updated in the last interval and early return if so.
+  // Will always check immediately on first boot.
   const unsigned long current_milliseconds = millis();
   const unsigned long waited_since_last_update_milliseconds = current_milliseconds - last_update_attempt_milliseconds;
   if (waited_since_last_update_milliseconds < update_interval_microseconds)
