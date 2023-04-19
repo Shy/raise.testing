@@ -1,8 +1,8 @@
 #include "RaiseDev.h"
 
-const String DASHBOARD_RAISE_DEV_DOMAIN =
-    "https://dashboard.raise.dev";
-const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
+const String RAISE_DEV_CONSOLE_DOMAIN =
+    "https://console.raise.dev";
+const char *RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE =
     "-----BEGIN CERTIFICATE-----\n"
     "MIIDzTCCArWgAwIBAgIQCjeHZF5ftIwiTv0b7RQMPDANBgkqhkiG9w0BAQsFADBa\n"
     "MQswCQYDVQQGEwJJRTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJl\n"
@@ -26,8 +26,8 @@ const char *DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE =
     "CZMRJCQUzym+5iPDuI9yP+kHyCREU3qzuWFloUwOxkgAyXVjBYdwRVKD05WdRerw\n"
     "6DEdfgkfCv4+3ao8XnTSrLE=\n"
     "-----END CERTIFICATE-----\n";
-const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 5;
-const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 30;
+const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 15;
+const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60 * 2;
 
 // Callback when HTTPUpdate starts
 const void httpUpdateOnStart()
@@ -62,7 +62,7 @@ const void RaiseDev::begin()
   }
 
   // Set SSL root certificate so we can validate HTTPS connections.
-  wifiClientSecure.setCACert(DASHBOARD_RAISE_DEV_ROOT_CA_CERTIFICATE);
+  wifiClientSecure.setCACert(RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE);
 
   // Reading data over SSL may be slow, use a longer timeout (in seconds).
   wifiClientSecure.setTimeout(10);
@@ -110,6 +110,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   }
 
   // Check if we've updated in the last interval and early return if so.
+  // Will always check immediately on first boot.
   const unsigned long current_milliseconds = millis();
   const unsigned long waited_since_last_update_milliseconds = current_milliseconds - last_update_attempt_milliseconds;
   if (waited_since_last_update_milliseconds < update_interval_microseconds)
@@ -118,7 +119,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   }
   last_update_attempt_milliseconds = current_milliseconds;
 
-  const String updater_url = String(DASHBOARD_RAISE_DEV_DOMAIN + "/accounts/" + account + "/updater");
+  const String updater_url = String(RAISE_DEV_CONSOLE_DOMAIN + "/accounts/" + account + "/updater");
   log_i("Updating current firmware version %s from %s", current_firmware_version, updater_url.c_str());
 
   // This will update and reboot automatically on a successful, new firmware download.
