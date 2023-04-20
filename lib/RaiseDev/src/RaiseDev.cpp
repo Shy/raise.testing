@@ -1,5 +1,28 @@
 #include "RaiseDev.h"
 
+#if defined(ESP8266)
+// Emulate the nicer default ESP32 APIs on ESP8266
+auto httpUpdate = ESPhttpUpdate;
+
+#if defined(CORE_DEBUG_LEVEL) && CORE_DEBUG_LEVEL > 0
+#define log_d(msg, ...) ets_printf(msg, ##__VA_ARGS__);
+#else
+#define log_d(msg)
+#endif
+
+#if defined(CORE_DEBUG_LEVEL) && CORE_DEBUG_LEVEL > 1
+#define log_e(msg, ...) ets_printf(msg, ##__VA_ARGS__);
+#else
+#define log_e(msg)
+#endif
+
+#if defined(CORE_DEBUG_LEVEL) && CORE_DEBUG_LEVEL > 3
+#define log_i(msg, ...) ets_printf(msg, ##__VA_ARGS__);
+#else
+#define log_i(msg)
+#endif
+#endif // defined(ESP8266)
+
 const String RAISE_DEV_CONSOLE_DOMAIN =
     "https://console.raise.dev";
 const char *RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE =
@@ -26,6 +49,11 @@ const char *RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE =
     "CZMRJCQUzym+5iPDuI9yP+kHyCREU3qzuWFloUwOxkgAyXVjBYdwRVKD05WdRerw\n"
     "6DEdfgkfCv4+3ao8XnTSrLE=\n"
     "-----END CERTIFICATE-----\n";
+const long GMT_OFFSET_SECONDS = 0;
+const int DAYLIGHT_OFFSET_SECONDS = 0;
+const char *NTP_SERVER_PRIMARY = "pool.ntp.org";
+const char *NTP_SERVER_SECONDARY = "time.nist.gov";
+const unsigned long MINIMUM_UNIX_TIME = 8 * 3600 * 2;
 const unsigned long DEFAULT_UPDATE_INTERVAL_MILLISECONDS = 1000 * 15;
 const unsigned long FAILED_UPDATE_INTERVAL_MILLISECONDS = 1000 * 60 * 2;
 
@@ -53,6 +81,15 @@ const void httpUpdateOnError(const int error_code)
   log_e("Firmware download error (HttpUpdate code %d)", error_code);
 }
 
+const void setSSLRootCert(WiFiClientSecure &wifiClientSecure)
+{
+#if defined(ESP32)
+  wifiClientSecure.setCACert(RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE);
+#elif defined(ESP8266)
+  wifiClientSecure.setTrustAnchors(new BearSSL::X509List(RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE));
+#endif
+}
+
 const void RaiseDev::begin()
 {
   // Don't run begin() twice.
@@ -61,8 +98,8 @@ const void RaiseDev::begin()
     return;
   }
 
-  // Set SSL root certificate so we can validate HTTPS connections.
-  wifiClientSecure.setCACert(RAISE_DEV_CONSOLE_ROOT_CA_CERTIFICATE);
+  // So we can validate HTTPS connections.
+  setSSLRootCert(wifiClientSecure);
 
   // Reading data over SSL may be slow, use a longer timeout (in seconds).
   wifiClientSecure.setTimeout(10);
@@ -75,9 +112,6 @@ const void RaiseDev::begin()
 
   // Follow correctly implemented redirects.
   httpUpdate.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
-
-  // Setup NTP client for SSL certificate validation..
-  ntpClient.begin();
 
   begin_method_called = true;
 }
@@ -95,8 +129,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   }
 
   // Correct system time is required for SSL certificate validation
-  ntpClient.update();
-  if (!ntpClient.isTimeSet())
+  if (!setClockViaNTP())
   {
     log_d("Device time not yet set from NTP...");
     return;
@@ -120,7 +153,7 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
   last_update_attempt_milliseconds = current_milliseconds;
 
   const String updater_url = String(RAISE_DEV_CONSOLE_DOMAIN + "/accounts/" + account + "/updater");
-  log_i("Updating current firmware version %s from %s", current_firmware_version, updater_url.c_str());
+  log_i("Updating current firmware version %s from %s", current_firmware_version.c_str(), updater_url.c_str());
 
   // This will update and reboot automatically on a successful, new firmware download.
   last_update_attempt_return_code = httpUpdate.update(
@@ -141,4 +174,43 @@ const void RaiseDev::updateFirmware(const String account, const String current_f
     log_i("Firmware updated OK");
     break;
   }
+}
+
+// Set the system time using NTP
+// Necessary to perform SSL validation
+const bool RaiseDev::setClockViaNTP()
+{
+  if (ntp_completed)
+  {
+    return true;
+  }
+
+  if (!ntp_started)
+  {
+    // Set device time to UTC.
+    configTime(GMT_OFFSET_SECONDS, DAYLIGHT_OFFSET_SECONDS, NTP_SERVER_PRIMARY, NTP_SERVER_SECONDARY);
+    log_i("NTP time sync requested");
+    ntp_started = true;
+  }
+
+  time_t current_unix_time = time(nullptr);
+
+  // Check that the system time is above a sensible floor.
+  if (current_unix_time < MINIMUM_UNIX_TIME)
+  {
+    log_d("Still waiting for updated system time");
+    return false;
+  }
+
+  // Convert Unix time to time structure.
+  struct tm current_time_info;
+  gmtime_r(&current_unix_time, &current_time_info);
+
+  // Convert time structure to a human-readable string.
+  const char *current_time_string = asctime(&current_time_info);
+  log_i("System time set via NTP to %s", current_time_string);
+
+  ntp_completed = true;
+
+  return true;
 }
