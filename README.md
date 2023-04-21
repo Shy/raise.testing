@@ -1,10 +1,10 @@
 # Firmware
 
-Raise's ESP32 firmware.
+Raise's ESP32 firmware for testing <https://github.com/raisedevs/raise-dev-library>.
 
 ## Building and Developing (on macOS)
 
-We recommend building this by using VSCode and its PlatformIO plugin:
+We recommend building this by using VSCode and its PlatformIO extension:
 
 ```console
 # Install VSCode from Homebrew Cask
