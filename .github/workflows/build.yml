@@ -26,7 +26,6 @@ jobs:
             #define WIFI_PASSWORD "${{ secrets.WIFI_PASSWORD }}"
       - run: pip install --upgrade platformio
       - run: pio run
-      - run: pio pkg pack lib/RaiseDev
       - uses: raisedevs/version-upload-action@main
         id: version-upload
         if: github.ref == 'refs/heads/main'
