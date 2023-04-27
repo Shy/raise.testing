@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: "3.9"
       - uses: DamianReeves/write-file-action@v1.2
+        name: Write include/wifi_credentials.h
         with:
           path: include/wifi_credentials.h
           contents: |
