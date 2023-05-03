@@ -53,5 +53,5 @@ void loop()
     return;
   }
 
-  raiseDev.updateFirmware("raisedevs", current_firmware_version);
+  raiseDev.updateFirmware("johndbritton-s-account", current_firmware_version);
 }
