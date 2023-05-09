@@ -1,4 +1,4 @@
-# Firmware 
+# Firmware
 
 Raise's ESP32 firmware for testing <https://github.com/raisedevs/raise-dev-library>.
 
