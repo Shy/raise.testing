@@ -31,7 +31,7 @@ jobs:
         id: version-upload
         if: github.ref == 'refs/heads/main'
         with:
-          workspace: johndbritton-s-account
+          workspace: johndbritton
           firmware: firmware
           binary: .pio/build/esp32dev/firmware.bin
       - name: Output Version details
