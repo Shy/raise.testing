@@ -19,8 +19,6 @@ bool was_wifi_connected_message_output = false;
 // defined by -DFIRMWARE_VERSION in platformio.ini using `git describe`
 const String current_firmware_version = FIRMWARE_VERSION;
 
-RaiseDev raiseDev;
-
 void setup()
 {
   // Set the serial port's baud-rate to the same as in platformio.ini
