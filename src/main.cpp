@@ -53,5 +53,5 @@ void loop()
     return;
   }
 
-  raiseDev.updateFirmware("johndbritton", current_firmware_version);
+  raiseDev.updateFirmware("personal-nonsense", current_firmware_version);
 }

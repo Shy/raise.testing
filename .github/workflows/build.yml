@@ -1,42 +1,42 @@
 name: Build
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+    push:
+        branches:
+            - main
+    pull_request:
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-      - uses: DamianReeves/write-file-action@v1.2
-        name: Write include/wifi_credentials.h
-        with:
-          path: include/wifi_credentials.h
-          contents: |
-            #define WIFI_SSID "${{ secrets.WIFI_SSID }}"
-            #define WIFI_PASSWORD "${{ secrets.WIFI_PASSWORD }}"
-      - run: pip install --upgrade platformio
-      - run: pio run
-      - uses: raisedevs/version-upload-action@main
-        id: version-upload
-        if: github.ref == 'refs/heads/main'
-        with:
-          workspace: johndbritton
-          firmware: firmware
-          binary: .pio/build/esp32dev/firmware.bin
-      - name: Output Version details
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo Version Name: ${{ steps.version-upload.outputs.name }}
-          echo Version Show URL: ${{ steps.version-upload.outputs.show-url }}
-          echo Version Binary URL: ${{ steps.version-upload.outputs.binary-url }}
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.cache/pip
+                      ~/.platformio/.cache
+                  key: ${{ runner.os }}-pio
+            - uses: actions/setup-python@v4
+              with:
+                  python-version: "3.9"
+            - uses: DamianReeves/write-file-action@v1.2
+              name: Write include/wifi_credentials.h
+              with:
+                  path: include/wifi_credentials.h
+                  contents: |
+                      #define WIFI_SSID "${{ secrets.WIFI_SSID }}"
+                      #define WIFI_PASSWORD "${{ secrets.WIFI_PASSWORD }}"
+            - run: pip install --upgrade platformio
+            - run: pio run
+            - uses: raisedevs/version-upload-action@main
+              id: version-upload
+              if: github.ref == 'refs/heads/main'
+              with:
+                  workspace: personal-nonsense
+                  firmware: raise-test
+                  binary: .pio/build/esp32dev/firmware.bin
+            - name: Output Version details
+              if: github.ref == 'refs/heads/main'
+              run: |
+                  echo Version Name: ${{ steps.version-upload.outputs.name }}
+                  echo Version Show URL: ${{ steps.version-upload.outputs.show-url }}
+                  echo Version Binary URL: ${{ steps.version-upload.outputs.binary-url }}
